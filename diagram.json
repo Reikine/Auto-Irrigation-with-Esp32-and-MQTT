@@ -1,0 +1,179 @@
+{
+    "version": 1,
+    "author": "Riku Engineer",
+    "editor": "wokwi",
+    "parts": [
+        {
+            "type": "board-esp32-devkit-c-v4",
+            "id": "esp",
+            "top": 0,
+            "left": 0,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-potentiometer",
+            "id": "pot1",
+            "top": -120,
+            "left": -100,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-potentiometer",
+            "id": "pot2",
+            "top": -120,
+            "left": 30,
+            "attrs": {}
+        },
+        {
+            "type": "board-ssd1306",
+            "id": "oled1",
+            "top": 150,
+            "left": 10,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-relay-module",
+            "id": "relay1",
+            "top": -50,
+            "left": 200,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-relay-module",
+            "id": "relay2",
+            "top": 50,
+            "left": 200,
+            "attrs": {}
+        },
+        {
+            "type": "wokwi-buzzer",
+            "id": "buzzer1",
+            "top": 170,
+            "left": 150,
+            "attrs": {}
+        }
+    ],
+    "connections": [
+        [
+            "esp:TX",
+            "$serialMonitor:RX",
+            "",
+            []
+        ],
+        [
+            "esp:RX",
+            "$serialMonitor:TX",
+            "",
+            []
+        ],
+        [
+            "pot1:GND",
+            "esp:GND.1",
+            "black",
+            []
+        ],
+        [
+            "pot1:VCC",
+            "esp:3V3",
+            "red",
+            []
+        ],
+        [
+            "pot1:SIG",
+            "esp:34",
+            "green",
+            []
+        ],
+        [
+            "pot2:GND",
+            "esp:GND.1",
+            "black",
+            []
+        ],
+        [
+            "pot2:VCC",
+            "esp:3V3",
+            "red",
+            []
+        ],
+        [
+            "pot2:SIG",
+            "esp:35",
+            "green",
+            []
+        ],
+        [
+            "oled1:GND",
+            "esp:GND.2",
+            "black",
+            []
+        ],
+        [
+            "oled1:VCC",
+            "esp:3V3",
+            "red",
+            []
+        ],
+        [
+            "oled1:SDA",
+            "esp:21",
+            "blue",
+            []
+        ],
+        [
+            "oled1:SCL",
+            "esp:22",
+            "yellow",
+            []
+        ],
+        [
+            "relay1:VCC",
+            "esp:5V",
+            "red",
+            []
+        ],
+        [
+            "relay1:GND",
+            "esp:GND.2",
+            "black",
+            []
+        ],
+        [
+            "relay1:IN",
+            "esp:26",
+            "orange",
+            []
+        ],
+        [
+            "relay2:VCC",
+            "esp:5V",
+            "red",
+            []
+        ],
+        [
+            "relay2:GND",
+            "esp:GND.2",
+            "black",
+            []
+        ],
+        [
+            "relay2:IN",
+            "esp:27",
+            "orange",
+            []
+        ],
+        [
+            "buzzer1:2",
+            "esp:GND.3",
+            "black",
+            []
+        ],
+        [
+            "buzzer1:1",
+            "esp:4",
+            "purple",
+            []
+        ]
+    ],
+    "dependencies": {}
+}
