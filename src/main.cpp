@@ -4,39 +4,43 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Preferences.h> // PENTING: Untuk simpan settingan biar tidak hilang
+#include <Preferences.h>
 
 // --- KONFIGURASI WIFI & MQTT ---
-const char *ssid = "Wokwi-GUEST"; // Ganti jika pakai hardware asli
-const char *password = "";
+const char *ssid = "POCO M3 Pro 5G";
+const char *password = "11111111";
 const char *mqtt_server = "broker.emqx.io";
 
 const char *topic_control = "riku/garden/control";
 const char *topic_data = "riku/garden/full_data";
 
-// --- KONFIGURASI HARDWARE ---
+// --- KONFIGURASI OLED ---
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+#define OLED_MOSI 23
+#define OLED_CLK 18
+#define OLED_DC 2
+#define OLED_CS 5
+#define OLED_RESET 4
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
 const int PIN_SENSOR_1 = 34;
 const int PIN_SENSOR_2 = 35;
 const int PIN_RELAY_1 = 26;
 const int PIN_RELAY_2 = 27;
-const int PIN_BUZZER = 4;
+const int PIN_BUZZER = 25;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-Preferences preferences; // Objek untuk akses memori
+Preferences preferences;
 
 // --- VARIABEL GLOBAL ---
 unsigned long lastMsg = 0;
 bool manualOverride = false;
 bool manualP1 = false;
 bool manualP2 = false;
-int batasKering = 30; // Default awal (akan ditimpa oleh nilai tersimpan)
+int batasKering = 30;
 
-// --- FUNGSI CALLBACK (Saat terima pesan dari Web) ---
 void callback(char *topic, byte *payload, unsigned int length)
 {
   String message;
@@ -48,7 +52,6 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.print("Pesan masuk: ");
   Serial.println(message);
 
-  // LOGIKA 1: Jika pesan berupa ANGKA -> Update Batas Kering
   if (isdigit(message[0]))
   {
     int nilaiBaru = message.toInt();
@@ -56,7 +59,6 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
       batasKering = nilaiBaru;
 
-      // Simpan ke Memori Permanen (NVS)
       preferences.begin("garden-data", false);
       preferences.putInt("limit", batasKering);
       preferences.end();
@@ -65,7 +67,6 @@ void callback(char *topic, byte *payload, unsigned int length)
       Serial.println(batasKering);
     }
   }
-  // LOGIKA 2: Kontrol Manual (Harus sama persis dengan tombol di Web)
   else if (message == "Pompa 1 Hidup")
   {
     digitalWrite(PIN_RELAY_1, HIGH);
@@ -114,7 +115,7 @@ void reconnect()
     if (client.connect(clientId.c_str()))
     {
       client.publish("riku/garden/status", "System Online");
-      client.subscribe(topic_control); // Subscribe ke topik kontrol
+      client.subscribe(topic_control);
     }
     else
     {
@@ -134,18 +135,17 @@ void setup()
   pinMode(PIN_SENSOR_1, INPUT);
   pinMode(PIN_SENSOR_2, INPUT);
 
-  // Load Settingan Terakhir dari Memori
-  preferences.begin("garden-data", true);        // true = read only
-  batasKering = preferences.getInt("limit", 30); // Ambil nilai, default 30
+  preferences.begin("garden-data", true);
+  batasKering = preferences.getInt("limit", 30);
   preferences.end();
 
   // Setup Layar
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  if (!display.begin(SSD1306_SWITCHCAPVCC))
   {
+    Serial.println(F("Gagal memulai...."));
     for (;;)
       ;
   }
-  display.clearDisplay();
 
   setup_wifi();
   client.setServer(mqtt_server, 1883);
@@ -180,7 +180,7 @@ void loop()
     }
     else
     {
-      // MODE OTOMATIS (Pakai variabel batasKering)
+
       if (moist1 < batasKering)
       {
         digitalWrite(PIN_RELAY_1, HIGH);
@@ -220,12 +220,12 @@ void loop()
     }
 
     display.setCursor(0, 15);
-    display.print("Plant A: ");
+    display.print("Tanaman 1: ");
     display.print(moist1);
     display.print("% ");
     display.println(statusP1);
     display.setCursor(0, 30);
-    display.print("Plant B: ");
+    display.print("Tanaman 2: ");
     display.print(moist2);
     display.print("% ");
     display.println(statusP2);
